@@ -1,0 +1,5 @@
+
+$.ajax({
+  console.log("first")
+
+});
