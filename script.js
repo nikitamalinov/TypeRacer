@@ -1,19 +1,18 @@
 const RANDOM_QUOTE_API_URL = 'http://api.quotable.io/random'
-//set our elements that we want to manipulate
-const quoteDisplayElement = document.getElementById('quoteDisplay')
-const quoteInputElement = document.getElementById('quoteInput')
+const quoteDisplay = document.getElementById('quoteDisplay')
+const quoteInput = document.getElementById('quoteInput')
 const timerElement = document.getElementById('timer')
 const btn = document.getElementById("btn")
 var runProgram = false
-
-
+quoteInput.disabled = true;
+ 
 btn.addEventListener("click", updateBtn);
 
-quoteInputElement.addEventListener('input', () => {
+quoteInput.addEventListener('input', () => {
   //get everysingle character in quote
-  const arrayQuote = quoteDisplayElement.querySelectorAll('span')
+  const arrayQuote = quoteDisplay.querySelectorAll('span')
   //get every single input value
-  const arrayValue = quoteInputElement.value.split('')
+  const arrayValue = quoteInput.value.split('')
 
   let correct = true
   //color each character
@@ -44,15 +43,16 @@ function getRandomQuote() {
 
 async function renderNewQuote() {
   const quote = await getRandomQuote()
-  quoteDisplayElement.innerHTML = '' 
+  quoteDisplay.innerHTML = ''
+  quoteInput.value = null
   //want to create seperate characters in the text quote
   quote.split('').forEach(character => {
     const characterSpan = document.createElement('span')
     characterSpan.innerText = character
-    quoteDisplayElement.appendChild(characterSpan)
+    quoteDisplay.appendChild(characterSpan)
   })
   //nothing in the textbox when starting out
-  quoteInputElement.value = null
+  
   startTimer()
 }
 
@@ -86,11 +86,14 @@ function getTimerTime() {
 
 function updateBtn() {
   if(btn.innerHTML === "Start"){
+    quoteInput.disabled = false;
+    quoteInput.focus()
     runProgram = true
     renderNewQuote()
     btn.innerHTML = "End"
   }
   else{
+    quoteInput.disabled = true;
     runProgram = false
     btn.innerHTML = "Start"
   }
