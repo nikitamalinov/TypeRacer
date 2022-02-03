@@ -2,11 +2,40 @@ const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random'
 const quoteDisplay = document.getElementById('quoteDisplay')
 const quoteInput = document.getElementById('quoteInput')
 const timerElement = document.getElementById('timer')
+const WPMElement= document.getElementById('wpm')
 const btn = document.getElementById("btn")
 var runProgram = false
 quoteInput.disabled = true;
-let countLetters = 0
+let toFive = 0
+let dataArray = []
+let isFive = 0;
+createHighChart()
 
+function createHighChart(){
+  $(function () {
+    $('#notContainer').highcharts({
+      plotOptions: {
+        series: {
+            animation: false
+        }
+    },
+      title:{
+        text: "WPM"
+      },
+      yAxis: {
+        title: {
+          text: 'Seconds'
+        }
+      },
+      series: [{ name: "wpm", data: dataArray}],
+      xAxis: {
+        name: "WPM",
+        max: 12,
+        categories: ['5', '10', '15', '20', '25', '30', "35", "40", "45", "50", "55", "60"]
+      },
+    });
+  });
+}
  
 btn.addEventListener("click", updateBtn);
 
@@ -15,9 +44,13 @@ quoteInput.addEventListener('input', () => {
   const arrayQuote = quoteDisplay.querySelectorAll('span')
   //get every single input value
   const arrayValue = quoteInput.value.split('')
-
-  let correct = true
+  toFive++
+  WPMElement.innerHTML = "&nbspWPM: " + parseInt((toFive/5.7)/(getTimerTime()+1)*60)
+  console.log(dataArray)
+  let correct = true 
   //color each character
+  createHighChart()
+
   arrayQuote.forEach((characterSpan, index) => {
     const character = arrayValue[index]
     if (character == null) {
@@ -27,7 +60,7 @@ quoteInput.addEventListener('input', () => {
     } else if (character === characterSpan.innerText) {
       characterSpan.classList.add('correct')
       characterSpan.classList.remove('incorrect')
-      countLetters++
+      
     } else {
       characterSpan.classList.remove('correct')
       characterSpan.classList.add('incorrect')
@@ -50,6 +83,9 @@ async function renderNewQuote() {
   const quote = await getRandomQuote()
   quoteDisplay.innerHTML = ''
   quoteInput.value = null
+  toFive = 0 
+  isFive = 0 
+  createHighChart()
   //want to create seperate characters in the text quote
   quote.split('').forEach(character => {
     const characterSpan = document.createElement('span')
@@ -73,11 +109,17 @@ function startTimer() {
     return;
   }    
     //create parent grid element for timer time and wpm and accuracy
-    timer.innerText = "Time Left: " + (60 - getTimerTime()) //+"   WPM: " + countLetters/getTimerTime()
-    if(timer.innerText === "Time Left: 0"){
+    timerElement.innerText = "Time Left: " + (60 - getTimerTime())
+    if(timerElement.innerText === "Time Left: 0"){
       
       timerElement.innerText = "Time Left: 60"//   WPM: 0"
       disableInput()
+    }
+    isFive += .5
+    if(isFive == 5)
+    {
+      dataArray.push(parseInt((toFive/5.7)/(getTimerTime()+1)*60))
+      isFive = 0
     }
 
   }, 500)
@@ -117,42 +159,4 @@ function updateBtn() {
 
 
 
-
-
-  function connect() {
-    if(window.ethereum) {
-      window.ethereum.request({method: 'eth_requestAccounts'})
-      .then(result => {
-        
-        accountChangedHandler(result[0]);
-  
-      })
-  
-    } else {
-      window.open("https://metamask.io/", "_blank")
-      
-     
-    }
-  }
-  
-  const accountChangedHandler = (newAccount) => {
-    let btn = document.getElementById("connectWallet")
-    if (ethereum.chainId != 1){
-      btn.innerHTML = "Please change to Eth Network"
-    }
-    else
-    {
-      btn.innerHTML = "ETH | " + newAccount.substring(0,6) + "..." + newAccount.slice(-4); //display the network too 
-    }
-    btn.classList.remove("connect-wallet")
-    btn.classList.add("connected-wallet")
-  }
-  
-  
-  
-  
-  //make then stay on the USDC chain
-  ethereum.on('chainChanged', (_chainId) => window.location.reload());
-  
-  
   
